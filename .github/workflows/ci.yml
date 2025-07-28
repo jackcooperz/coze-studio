@@ -15,8 +15,6 @@ jobs:
             OS: ubuntu-latest
     name: Setup and Install Dependencies
     runs-on: ${{ matrix.OS }}
-    env:
-      BUILD_BRANCH: ${{ github.head_ref || github.ref_name }}
     outputs:
       cache_file: ${{ steps.process-files.outputs.cache_file }}
       matrix_node_version: ${{ matrix.NodeVersion }}
@@ -79,6 +77,8 @@ jobs:
     needs: setup
     runs-on: ${{ needs.setup.outputs.matrix_os }}
     name: Increment Build
+    env:
+      BUILD_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
       - uses: actions/checkout@v3
         with:
