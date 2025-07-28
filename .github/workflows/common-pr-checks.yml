@@ -2,6 +2,7 @@ name: PR Common Checks
 on:
   pull_request:
     paths:
+      - 'github/**'
       - 'frontend/**'
       - 'common/**'
       - 'rush.json'

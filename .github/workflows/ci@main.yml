@@ -5,6 +5,7 @@ on:
     # test only
     branches: ['main',"chore/setup-ci"]
     paths:
+      - 'github/**'
       - 'frontend/**'
       - 'common/**'
       - 'rush.json'
