@@ -1,6 +1,10 @@
 name: PR Common Checks
 on:
   pull_request:
+    paths:
+      - 'frontend/**'
+      - 'common/**'
+      - 'rush.json'
     types: [opened, edited, synchronize, reopened]
 
 jobs:
