@@ -11,8 +11,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - NodeVersion: 20.14.x
-            NodeVersionDisplayName: 20
+          - NodeVersion: 22.16.0
+            NodeVersionDisplayName: 22
             OS: ubuntu-latest
     name: Node.js v${{ matrix.NodeVersionDisplayName }} (${{ matrix.OS }})
     runs-on: ${{ matrix.OS }}
