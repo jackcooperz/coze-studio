@@ -194,7 +194,7 @@ func (p *pluginServiceImpl) getAccessTokenByAuthorizationCode(ctx context.Contex
 	meta := ci.Meta
 	info, exist, err := p.oauthRepo.GetAuthorizationCode(ctx, ci.Meta)
 	if err != nil {
-		return "", errorx.Wrapf(err, "GetAuthorizationCode failed, userID=%s, pluginID=%d, isDraft=%p",
+		return "", errorx.Wrapf(err, "GetAuthorizationCode failed, userID=%s, pluginID=%d, isDraft=%t",
 			meta.UserID, meta.PluginID, meta.IsDraft)
 	}
 	if !exist {
@@ -437,7 +437,13 @@ func genAuthURL(info *entity.AuthorizationCodeInfo) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("marshal state failed, err=%v", err)
 	}
-	encryptState, err := utils.EncryptByAES(stateStr, utils.StateSecretKey)
+
+	secret := os.Getenv(utils.StateSecretEnv)
+	if secret == "" {
+		secret = utils.DefaultStateSecret
+	}
+
+	encryptState, err := utils.EncryptByAES(stateStr, secret)
 	if err != nil {
 		return "", fmt.Errorf("encrypt state failed, err=%v", err)
 	}
