@@ -31,7 +31,6 @@ import (
 	model2 "github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/schema"
-	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 	"gorm.io/driver/mysql"
@@ -48,6 +47,7 @@ import (
 	"github.com/coze-dev/coze-studio/backend/domain/workflow/internal/nodes/qa"
 	repo2 "github.com/coze-dev/coze-studio/backend/domain/workflow/internal/repo"
 	schema2 "github.com/coze-dev/coze-studio/backend/domain/workflow/internal/schema"
+	"github.com/coze-dev/coze-studio/backend/infra/impl/cache/redis"
 	"github.com/coze-dev/coze-studio/backend/infra/impl/checkpoint"
 	mock "github.com/coze-dev/coze-studio/backend/internal/mock/infra/contract/idgen"
 	storageMock "github.com/coze-dev/coze-studio/backend/internal/mock/infra/contract/storage"
@@ -96,9 +96,7 @@ func TestQuestionAnswer(t *testing.T) {
 		}
 		defer s.Close()
 
-		redisClient := redis.NewClient(&redis.Options{
-			Addr: s.Addr(),
-		})
+		redisClient := redis.NewWithAddrAndPassword(s.Addr(), "")
 
 		mockIDGen := mock.NewMockIDGenerator(ctrl)
 		mockIDGen.EXPECT().GenID(gomock.Any()).Return(time.Now().UnixNano(), nil).AnyTimes()

@@ -33,7 +33,6 @@ import (
 	"github.com/coze-dev/coze-studio/backend/api/model/crossdomain/singleagent"
 	"github.com/coze-dev/coze-studio/backend/crossdomain/contract/crossworkflow"
 	"github.com/coze-dev/coze-studio/backend/domain/agent/singleagent/entity"
-	"github.com/coze-dev/coze-studio/backend/pkg/errorx"
 	"github.com/coze-dev/coze-studio/backend/pkg/lang/conv"
 	"github.com/coze-dev/coze-studio/backend/pkg/logs"
 )
@@ -96,14 +95,9 @@ func (r *replyChunkCallback) OnError(ctx context.Context, info *callbacks.RunInf
 			r.sw.Send(interruptEvent, nil)
 
 		} else {
-			logs.CtxErrorf(ctx, "node execute failed, component=%v, name=%v, err=%v",
+			logs.CtxErrorf(ctx, "[AgentRunError] | node execute failed, component=%v, name=%v, err=%v",
 				info.Component, info.Name, err)
-			var customErr errorx.StatusError
-			errMsg := "Internal server error"
-			if errors.As(err, &customErr) && customErr.Code() != 0 {
-				errMsg = customErr.Msg()
-			}
-			r.sw.Send(nil, errors.New(errMsg))
+			r.sw.Send(nil, err)
 		}
 
 	}
@@ -273,7 +267,6 @@ func convInterruptEventType(interruptEvent any) singleagent.InterruptEventType {
 }
 
 func (r *replyChunkCallback) concatToolsNodeOutput(ctx context.Context, output *schema.StreamReader[callbacks.CallbackOutput]) ([]*schema.Message, error) {
-	defer output.Close()
 	var toolsMsgChunks [][]*schema.Message
 	var sr *schema.StreamReader[*schema.Message]
 	var sw *schema.StreamWriter[*schema.Message]
@@ -286,7 +279,6 @@ func (r *replyChunkCallback) concatToolsNodeOutput(ctx context.Context, output *
 	returnDirectToolsMap := make(map[int]bool)
 	isReturnDirectToolsFirstCheck := true
 	isToolsMsgChunksInit := false
-
 	for {
 		cbOut, err := output.Recv()
 		if errors.Is(err, io.EOF) {
@@ -324,8 +316,8 @@ func (r *replyChunkCallback) concatToolsNodeOutput(ctx context.Context, output *
 					if !streamInitialized {
 						sr, sw = schema.Pipe[*schema.Message](5)
 						r.sw.Send(&entity.AgentEvent{
-							EventType:       singleagent.EventTypeOfToolsAsChatModelStream,
-							ChatModelAnswer: sr,
+							EventType:             singleagent.EventTypeOfToolsAsChatModelStream,
+							ToolAsChatModelAnswer: sr,
 						}, nil)
 						streamInitialized = true
 					}
